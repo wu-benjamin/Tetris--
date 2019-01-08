@@ -4,6 +4,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.Clip;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.net.URL;
 import java.util.Timer;
@@ -189,11 +191,11 @@ public class Board {
         g.setColor(new Color(218, 165, 32));
         g.drawString("HIGH", 340, 220);
         g.drawString("SCORE", 340, 280);
-        g.drawString(String.valueOf(panel.getHighScore()), 340, 340);
+        g.drawString(new String(String.format("%07d", panel.getHighScore())), 340, 350);
         g.setColor(Color.WHITE);
         g.drawString("CURRENT", 340, 450);
         g.drawString("SCORE", 340, 510);
-        g.drawString(String.valueOf(panel.getScore()), 340, 570);
+        g.drawString(new String(String.format("%07d", panel.getScore())), 340, 570);
         if (panel.getGameState() != 2) {
             g.setColor(new Color(10, 10, 10, 200));
             g.fill3DRect(0, 0, ControlPanel.COL * 25 + 400, ControlPanel.ROW * 25, false);
