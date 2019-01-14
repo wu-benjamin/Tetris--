@@ -162,6 +162,15 @@ public class ControlPanel extends JPanel implements Runnable {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            public void run() {
+                try {
+                    save();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }));
         ControlPanel control = new ControlPanel();
         frame.setVisible(true);
         frame.setSize(COL * 25 + 300, ROW * 25);
