@@ -1,6 +1,5 @@
 package com.company;
 
-import javax.naming.ldap.Control;
 import java.awt.*;
 import java.util.Random;
 import java.util.Timer;

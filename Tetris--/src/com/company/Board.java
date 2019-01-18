@@ -4,14 +4,12 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.Clip;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.awt.font.FontRenderContext;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Board {
+class Board {
     private static Color[][] color;
     private static final Color TRANSPARENT = new Color(255,255,255,40);
     private static int length;
@@ -20,7 +18,7 @@ public class Board {
     private static Timer timer = new Timer();
     private static Player p;
     private static ControlPanel panel;
-    final public static int DROP_RATE = 800;
+    static final int DROP_RATE = 800;
     private static Font font;
 
     static {
@@ -31,21 +29,21 @@ public class Board {
         }
     }
 
-    public Board(ControlPanel panel, Player p) {
+    Board(ControlPanel controlPanel, Player player) {
         // Buffer
-        this.length = ControlPanel.ROW + 12;
-        this.width = ControlPanel.COL + 8;
-        this.color = new Color[length][width];
+        length = ControlPanel.ROW + 12;
+        width = ControlPanel.COL + 8;
+        color = new Color[length][width];
         for (int i = 0; i < length; i++) {
             for (int j = 0; j < width; j++) {
                 color[i][j] = TRANSPARENT;
             }
         }
-        this.panel = panel;
-        this.p = p;
+        panel = controlPanel;
+        p = player;
     }
 
-    public static void reset() {
+    private static void reset() {
         for (int i = 0; i < length; i++) {
             for (int j = 0; j < width; j++) {
                 color[i][j] = TRANSPARENT;
@@ -53,7 +51,7 @@ public class Board {
         }
     }
 
-    public static void add(int[][] points, Color c, int x, int y) {
+    static void add(int[][] points, Color c, int x, int y) {
         for (int i = 0; i < points.length; i++) {
             color[points[i][1] + y][points[i][0] + x] = c;
         }
@@ -68,7 +66,7 @@ public class Board {
         }
     }
 
-    public static Color[][] toDisplay() {
+    private static Color[][] toDisplay() {
         Color[][] toDisplay = new Color[length][width];
         for (int i = 0; i < length; i++) {
             for (int j = 0; j < width; j++) {
@@ -82,7 +80,7 @@ public class Board {
         return toDisplay;
     }
 
-    public static boolean playerIntersect(int[][] points, int x, int y) {
+    static boolean playerIntersect(int[][] points, int x, int y) {
         boolean intersects = false;
         for (int i = 0; i < points.length; i++) {
             // System.out.print(points.length + "\n" + points[0].length + "\n" + (points[i][0] + x) + "\n" + (points[i][1] + y) + "\n" + x + "\n" + y + "\n" + color.length + "\n" + color[0].length + "\n\n");
@@ -100,7 +98,7 @@ public class Board {
     }
 
     // Returns -1 if no completed row, otherwise returns index of completed row
-    public static int completedRow() {
+    static int completedRow() {
         int complete;
         for (int i = 0; i < length; i++) {
             complete = i;
@@ -116,7 +114,7 @@ public class Board {
         return -1;
     }
 
-    public static void clearRow(int c) {
+    static void clearRow(int c) {
         for (int i = c; i > 0; i--) {
             for (int j = 0; j < width; j++) {
                 color[i][j] = color[i - 1][j];
@@ -127,8 +125,8 @@ public class Board {
                 color[i][j] = TRANSPARENT;
             }
         }
-        panel.incrementScore(500);
-        p.setDropRate(Math.max(DROP_RATE - panel.getScore() / 50, 250));
+        ControlPanel.incrementScore(500);
+        Player.setDropRate(Math.max(DROP_RATE - panel.getScore() / 50, 250));
         try {
             URL resource = Board.class.getResource("/Resources/Destroy.wav");
             AudioInputStream audioIn = javax.sound.sampled.AudioSystem.getAudioInputStream(new File(resource.toURI()));
@@ -141,7 +139,7 @@ public class Board {
         //System.out.println("You have scored " + panel.getScore() + " so far! Keep up the good work!");
     }
 
-    public void paintComponent(Graphics2D g) {
+    void paintComponent(Graphics2D g) {
         g.setColor(new Color(20, 20, 20));
         g.fill3DRect(0, 0, ControlPanel.COL * 25 + 400, ControlPanel.ROW * 25, false);
         g.setColor(new Color(255,255,255,150));
@@ -191,11 +189,11 @@ public class Board {
         g.setColor(new Color(218, 165, 32));
         g.drawString("HIGH", 340, 220);
         g.drawString("SCORE", 340, 280);
-        g.drawString(new String(String.format("%07d", panel.getHighScore())), 340, 350);
+        g.drawString(String.format("%07d", panel.getHighScore()), 340, 350);
         g.setColor(Color.WHITE);
         g.drawString("CURRENT", 340, 450);
         g.drawString("SCORE", 340, 510);
-        g.drawString(new String(String.format("%07d", panel.getScore())), 340, 570);
+        g.drawString(String.format("%07d", panel.getScore()), 340, 570);
         if (panel.getGameState() != 2) {
             g.setColor(new Color(10, 10, 10, 200));
             g.fill3DRect(0, 0, ControlPanel.COL * 25 + 400, ControlPanel.ROW * 25, false);
@@ -228,38 +226,38 @@ public class Board {
         }
     }
 
-    public static int getWidth() {
+    static int getWidth() {
         return width;
     }
 
-    public void update(ControlPanel panel) {
-        if (panel.input.keyUsed() && !cooldown) {
-            if (panel.input.isKeyDown(KeyEvent.VK_A)) {
+    void update(ControlPanel panel) {
+        if (ControlPanel.input.keyUsed() && !cooldown) {
+            if (ControlPanel.input.isKeyDown(KeyEvent.VK_A)) {
                 Player.moveLeft();
                 cooldown = true;
                 TimerTask cooldown = new CooldownTask();
                 timer.schedule(cooldown, 100);
-            } else if (panel.input.isKeyDown(KeyEvent.VK_D)) {
+            } else if (ControlPanel.input.isKeyDown(KeyEvent.VK_D)) {
                 Player.moveRight();
                 cooldown = true;
                 TimerTask cooldown = new CooldownTask();
                 timer.schedule(cooldown, 100);
-            } else if (panel.input.isKeyDown(KeyEvent.VK_LEFT)) {
+            } else if (ControlPanel.input.isKeyDown(KeyEvent.VK_LEFT)) {
                 Player.rotateCounterClockwise();
                 cooldown = true;
                 TimerTask cooldown = new CooldownTask();
                 timer.schedule(cooldown, 325);
-            } else if (panel.input.isKeyDown(KeyEvent.VK_RIGHT)) {
+            } else if (ControlPanel.input.isKeyDown(KeyEvent.VK_RIGHT)) {
                 Player.rotateClockwise();
                 cooldown = true;
                 TimerTask cooldown = new CooldownTask();
                 timer.schedule(cooldown, 325);
-            } else if (panel.input.isKeyDown(KeyEvent.VK_DOWN) && panel.getGameState() == 2) {
+            } else if (ControlPanel.input.isKeyDown(KeyEvent.VK_DOWN) && panel.getGameState() == 2) {
                 Player.drop();
                 cooldown = true;
                 TimerTask cooldown = new CooldownTask();
                 timer.schedule(cooldown, 100);
-            } else if (panel.input.isKeyDown(KeyEvent.VK_SPACE) && panel.getGameState() != 2) {
+            } else if (ControlPanel.input.isKeyDown(KeyEvent.VK_SPACE) && panel.getGameState() != 2) {
                 panel.setGameState(2);
                 try {
                     URL resource = Board.class.getResource("/Resources/Start.wav");
@@ -270,12 +268,12 @@ public class Board {
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
-                panel.incrementScore(panel.getScore() * (-1));
+                ControlPanel.incrementScore(panel.getScore() * (-1));
                 reset();
                 cooldown = true;
                 TimerTask cooldown = new CooldownTask();
                 timer.schedule(cooldown, 250);
-            } else if (panel.input.isKeyDown(KeyEvent.VK_SPACE) && panel.getGameState() == 2) {
+            } else if (ControlPanel.input.isKeyDown(KeyEvent.VK_SPACE) && panel.getGameState() == 2) {
                 Player.swapReserve();
                 cooldown = true;
                 TimerTask cooldown = new CooldownTask();
